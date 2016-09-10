@@ -1,6 +1,6 @@
 import cv2, numpy, math, csv, sys
 
-cap = cv2.VideoCapture('videos/s9t1.mp4')
+cap = cv2.VideoCapture('input.mp4')
 
 # video fps
 FRAME_RATE = 30.0
@@ -18,11 +18,21 @@ time = 0
 writer = csv.writer(open('output.csv', 'wb'))
 writer.writerow(('Time', 'X', 'Y'))
 
+# recording data
+record = False
+
 while True:
     ret, frame = cap.read()
 
-    if cv2.waitKey(1) & 0xFF == ord('q') or frame is None:
+    key = cv2.waitKey(1)
+
+    if key == ord('q') or frame is None:
         break
+    elif key == ord('s'):
+        record = True
+    elif key == ord('e'):
+        record = False
+
 
     # resize frame and convert rgb to hsv colorscale
     frame = cv2.resize(frame, (0, 0), fx=float(0.5), fy=float(0.5))
@@ -78,6 +88,8 @@ while True:
     ball_y = origin_y - ball_raw_y
     path.append((ball_x, ball_y))
 
+    pix_to_cm_ratio = 10.0/rect[1][0]
+
     # draw tracked objects and display ball position
     cv2.drawContours(frame, [bottom_left_square], -1, (0, 255, 0), 2)
     cv2.circle(frame, (origin_x, origin_y), 5, (0, 0, 255), -1)
@@ -87,10 +99,11 @@ while True:
         cv2.circle(frame, (pos[0] + origin_x, origin_y - pos[1]), 2, (0, 100, 255), -1)
 
     # write data to csv file
-    writer.writerow((time, ball_x, ball_y))
+    if record:
+        writer.writerow((time, ball_x * pix_to_cm_ratio, ball_y * pix_to_cm_ratio))
 
-    # frame rate is 30 fps
-    time += 1/FRAME_RATE
+        # frame rate is 30 fps
+        time += 1/FRAME_RATE
 
     cv2.imshow("MASK", mask)
     cv2.imshow("LAP", lap)
