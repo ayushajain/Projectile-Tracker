@@ -1,12 +1,14 @@
-import cv2, numpy, math, csv, sys
+import cv2, math, csv
 
-cap = cv2.VideoCapture('videos/s9t3.mp4')
+cap = cv2.VideoCapture('videos/s7v2t1.mp4')
 
-# video fps
+# constants
 FRAME_RATE = 30.0
+ORIGIN_AREA = 3000
+SQUARE_LENGTH = 10.0
 
 # ball color threshold values
-color_lower = (29, 86, 6)
+color_lower = (29, 46, 6)
 color_upper = (64, 255, 255)
 
 # position and time
@@ -43,7 +45,7 @@ while True:
     mask = cv2.inRange(hsv, color_lower, color_upper)
 
     # erode noise picked up and dilate to compensate for ball's erosion
-    mask = cv2.erode(mask, None, iterations=3)
+    mask = cv2.erode(mask, None, iterations=2)
 
     # find contours
     blobs = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -52,8 +54,11 @@ while True:
 
         # calculate center of the ball and draw circle on original frame
         moments = cv2.moments(ball)
-        ball_raw_x = int((moments["m10"] / moments["m00"]))
-        ball_raw_y = int((moments["m01"] / moments["m00"]))
+        try:
+            ball_raw_x = int((moments["m10"] / moments["m00"]))
+            ball_raw_y = int((moments["m01"] / moments["m00"]))
+        except ZeroDivisionError:
+            pass
 
     # lapalacian filter for grid detection
     lap = cv2.Laplacian(gray, cv2.CV_16S, ksize=5, scale=1, delta=0)
@@ -75,7 +80,7 @@ while True:
         peri = cv2.arcLength(sqr, True)
         approx = cv2.approxPolyDP(sqr, 0.15 * peri, True)
 
-        if len(approx) == 4 and cv2.contourArea(sqr) > 1500 and dist < distance:
+        if len(approx) == 4 and cv2.contourArea(sqr) > ORIGIN_AREA and dist < distance:
             bottom_left_square = sqr
             distance = dist
 
@@ -87,7 +92,7 @@ while True:
     ball_y = origin_y - ball_raw_y
     path.append((ball_x, ball_y))
 
-    pix_to_cm_ratio = 10.0/rect[1][0]
+    pix_to_cm_ratio = SQUARE_LENGTH/rect[1][0]
 
     # draw tracked objects and display ball position
     cv2.drawContours(frame, [bottom_left_square], -1, (0, 255, 0), 2)

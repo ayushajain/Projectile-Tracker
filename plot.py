@@ -2,13 +2,13 @@ from matplotlib import pyplot as plt
 import csv
 
 # read 3 trials
-reader1 = list(csv.reader(open("data/s9t1.csv", "U")))
-reader2 = list(csv.reader(open("data/s9t2.csv", "U")))
-reader3 = list(csv.reader(open("data/s9t3.csv", "U")))
+reader1 = list(csv.reader(open("data/s7v2t1.csv", "U")))
+reader2 = list(csv.reader(open("data/s7v2t2.csv", "U")))
+reader3 = list(csv.reader(open("data/s7v2t3.csv", "U")))
 
 max_lines = min(len(reader1), len(reader2), len(reader3))
 
-c = 0
+# trial data
 time = []
 x = []
 upper_xs = []
@@ -24,7 +24,7 @@ g1 = []
 g2 = []
 g3 = []
 
-for i in range(1, max_lines - 2):
+for i in range(1, max_lines):
 
     # increment time
     if len(time) == 0:
@@ -32,13 +32,13 @@ for i in range(1, max_lines - 2):
     else:
         time.append(time[len(time) - 1] + 1/30.0)
 
-    g1.append([float(reader1[i][4]), float(reader1[i][5])])
-    g2.append([float(reader2[i][4]), float(reader2[i][5])])
-    g3.append([float(reader3[i][4]), float(reader3[i][5])])
+    g1.append([float(reader1[i][1]), float(reader1[i][2])])
+    g2.append([float(reader2[i][1]), float(reader2[i][2])])
+    g3.append([float(reader3[i][1]), float(reader3[i][2])])
 
     # calculate
-    line_x = [float(reader1[i][4]), float(reader2[i][4]), float(reader3[i][4])]
-    line_y = [float(reader1[i][5]), float(reader2[i][5]), float(reader3[i][5])]
+    line_x = [float(reader1[i][1]), float(reader2[i][1]), float(reader3[i][1])]
+    line_y = [float(reader1[i][2]), float(reader2[i][2]), float(reader3[i][2])]
     avg_x = sum(line_x)/3
     avg_y = sum(line_y)/3
     x.append(avg_x)
@@ -58,22 +58,20 @@ unc_x = sum(uncertainty_x)/len(uncertainty_x)
 unc_y = sum(uncertainty_y)/len(uncertainty_y)
 
 # set scale and title graphs
-plt.ylim([min(y),max(y)])
-plt.xlim([0,max(time)])
-plt.ylabel("Acceleration Y (cm/s^2)")
+plt.ylim([min(lower_xs), max(upper_xs)])
+plt.xlim([0, max(time)])
+plt.ylabel("Position X (cm)")
 plt.xlabel("Time (s)")
-title_text = "Illustration 2: Acceleration Y vs. Time (Avg. Uncert. = +/- " + "{0:.4f}".format(unc_y) + " cm/s^2)"
+title_text = "Illustration 1 (G2): Position X vs. Time (Avg. Uncert. = +/- " + "{0:.4f}".format(unc_x) + " cm)"
 
 # plot average and upper + lower bounds
-plt.fill_between(time, lower_ys, upper_ys, facecolor = "red")
-plt.plot(time, y, linewidth=2.0)
+plt.fill_between(time, lower_xs, upper_xs, facecolor = "red")
+plt.plot(time, x, linewidth=2.0)
 
 # plot trials side by side
-"""
-plt.plot(time, zip(*g1)[1], linewidth=2.0)
-plt.plot(time, zip(*g2)[1], linewidth=2.0)
-plt.plot(time, zip(*g3)[1], linewidth=2.0)
-"""
+#plt.plot(time, zip(*g1)[0], linewidth=2.0)
+#plt.plot(time, zip(*g2)[0], linewidth=2.0)
+#plt.plot(time, zip(*g3)[0], linewidth=2.0)
 
 plt.title(title_text)
 plt.show()
