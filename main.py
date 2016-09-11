@@ -1,6 +1,6 @@
 import cv2, numpy, math, csv, sys
 
-cap = cv2.VideoCapture('input.mp4')
+cap = cv2.VideoCapture('videos/s9t3.mp4')
 
 # video fps
 FRAME_RATE = 30.0
@@ -43,8 +43,7 @@ while True:
     mask = cv2.inRange(hsv, color_lower, color_upper)
 
     # erode noise picked up and dilate to compensate for ball's erosion
-    mask = cv2.erode(mask, None, iterations=2)
-    mask = cv2.dilate(mask, None, iterations=2)
+    mask = cv2.erode(mask, None, iterations=3)
 
     # find contours
     blobs = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -76,7 +75,7 @@ while True:
         peri = cv2.arcLength(sqr, True)
         approx = cv2.approxPolyDP(sqr, 0.15 * peri, True)
 
-        if len(approx) == 4 and cv2.contourArea(sqr) > 3500 and dist < distance:
+        if len(approx) == 4 and cv2.contourArea(sqr) > 1500 and dist < distance:
             bottom_left_square = sqr
             distance = dist
 
